@@ -1,0 +1,5 @@
+tmp
+data/*
+venv
+*__pycache__*
+results

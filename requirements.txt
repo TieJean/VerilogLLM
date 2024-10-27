@@ -1,0 +1,7 @@
+kagglehub
+transformers[torch]
+torch
+numpy
+pandas
+fsspec<=2024.9.0
+datasets
