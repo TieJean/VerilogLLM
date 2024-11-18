@@ -3,6 +3,11 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer
 import os
 
+def codegen_template(desc: str, code: str = ""):
+    input_text = f"Task: Write Verilog program for the given description.\nDescription: {desc}.\nGenerated Code:\n"
+    target_text = code
+    return input_text + target_text
+
 class VeriGenDataset(Dataset):
     def __init__(self, datapath: str, tokenizer: AutoTokenizer, max_length: int):
         if not os.path.exists(datapath):
@@ -40,23 +45,17 @@ class VeriGenDataset(Dataset):
     def __getitem__(self, idx):
         item = self.data[idx]
         # TODO need to have a text template function
-        text = f"Complete the following task in Verilog: {item['prompt']} {self.tokenizer.eos_token}\n Generated Code:\n {item['response']}"
+        text = codegen_template(desc=item['prompt'], code=item['response'])
 
-        # Tokenize text
-        encoding = self.tokenizer(
-            text, 
-            return_tensors="pt", 
-            max_length=self.max_length, 
-            padding="max_length", 
-            truncation=True
+        # Tokenize the inputs and targets
+        embeddings = self.tokenizer(
+            text, max_length=self.max_length, padding="max_length", truncation=True, return_tensors="pt"
         )
 
         # Use input_ids as labels for causal language modeling
-        input_ids = encoding["input_ids"].squeeze()
-        attention_mask = encoding["attention_mask"].squeeze()
-
-        # The labels should be the same as input_ids for causal LM tasks
-        labels = input_ids.clone()
+        input_ids = embeddings["input_ids"].squeeze()
+        attention_mask = embeddings["attention_mask"].squeeze()
+        labels = embeddings["input_ids"].squeeze().clone()
         
         return {
             "input_ids": input_ids,

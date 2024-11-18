@@ -1,5 +1,5 @@
 import torch
-from transformers import Trainer, TrainingArguments
+from transformers import Trainer, TrainingArguments, TrainerCallback
 from utils.models import *
 from utils.dataloader import *
 from peft import LoraConfig, get_peft_model, TaskType
@@ -12,8 +12,8 @@ if __name__ == "__main__":
         task_type=TaskType.CAUSAL_LM,  # Task type
         inference_mode=False,          # Indicates training, not inference
         r=8,                           # Low-rank matrix dimension
-        lora_alpha=16,                 # Scaling factor; W' = W = alpha/r * (AB)
-        # lora_dropout=0.1,              # Dropout for LoRA layers
+        lora_alpha=32,                 # Scaling factor; W' = W = alpha/r * (AB)
+        lora_dropout=0.05,              # Dropout for LoRA layers
     )
     model = get_peft_model(model, lora_config)
     # import pdb; pdb.set_trace()
@@ -24,11 +24,13 @@ if __name__ == "__main__":
     
     training_args = TrainingArguments(
         output_dir="./results",
-        num_train_epochs=2,
+        num_train_epochs=15,
         per_device_train_batch_size=2,
         save_steps=10,
         save_total_limit=2,
         logging_dir="./logs",
+        logging_steps=25,
+        report_to="none",
     )
 
     # Initialize Trainer
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     trainer.train()
     model.save_pretrained("./results/lora")
 
-    text = f"Prompt: Add two numbers in Verilog. Verilog Code:"
+    text = codegen_template(desc="Add two numbers in Verilog.")
     inputs = tokenizer(text, return_tensors="pt").to(device)
     output = model.generate(
         inputs["input_ids"],
