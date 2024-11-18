@@ -13,6 +13,7 @@ def load_codegen(device: str, type="multi"):
     model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
     tokenizer = AutoTokenizer.from_pretrained(checkpoint)
     tokenizer.pad_token = tokenizer.eos_token
+    model.generation_config.pad_token_id = tokenizer.pad_token_id
     return model, tokenizer
 
 def load_gpt2(device: str):
@@ -20,4 +21,5 @@ def load_gpt2(device: str):
     model = GPT2LMHeadModel.from_pretrained(model_name).to(device)
     tokenizer = GPT2Tokenizer.from_pretrained(model_name)
     tokenizer.pad_token = tokenizer.eos_token
+    model.generation_config.pad_token_id = tokenizer.pad_token_id
     return model, tokenizer
