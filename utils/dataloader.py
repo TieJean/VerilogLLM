@@ -2,11 +2,50 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer
 import os
+from datasets import load_from_disk
 
 def codegen_template(desc: str, code: str = ""):
     input_text = f"Task: Write Verilog program for the given description.\nDescription: {desc}.\nGenerated Code:\n"
     target_text = code
     return input_text + target_text
+
+class MGDataset(Dataset):
+    def __init__(self, datapath: str, tokenizer: AutoTokenizer, max_length: int):
+        if not os.path.exists(datapath):
+            raise FileNotFoundError(f"The file '{datapath}' does not exist.")
+        
+        # Load the dataset from disk
+        self.data = load_from_disk(datapath)
+        print(f"Loaded dataset with {len(self.data)} samples.")
+        self.tokenizer = tokenizer
+        self.max_length = max_length
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        # Extract code and description
+        item = self.data[idx]
+        description = item['description']
+        code = item['code']
+
+        # Combine using the codegen_template (assumes it formats the text as desired)
+        text = codegen_template(desc=description, code=code)
+
+        # Tokenize the inputs and targets
+        embeddings = self.tokenizer(
+            text, max_length=self.max_length, padding="max_length", truncation=True, return_tensors="pt"
+        )
+
+        # Use input_ids as labels for causal language modeling
+        input_ids = embeddings["input_ids"].squeeze()
+        attention_mask = embeddings["attention_mask"].squeeze()
+        labels = embeddings["input_ids"].squeeze().clone()
+
+        return {
+            "input_ids": input_ids,
+            "attention_mask": attention_mask,
+            "labels": labels
+        }
 
 class VeriGenDataset(Dataset):
     def __init__(self, datapath: str, tokenizer: AutoTokenizer, max_length: int):

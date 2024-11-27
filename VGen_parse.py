@@ -10,7 +10,7 @@ os.makedirs(output_folder, exist_ok=True)
 outfile = open("output.txt", "w")
 
 # Open the file to read the lines
-with open("train.csv", "r") as file:
+with open("data/train.csv", "r") as file:
     next(file) 
     for line_number, line in enumerate(file, start=1):
         # if line_number > max_lines:  # Stop reading after 1000 lines
@@ -32,15 +32,19 @@ if current_block:
     verilog_blocks.append({f"block number {block_number}": "\n".join(current_block)})
 
 
-blocks_per_file = 500
-file_count = 1
-for i in range(0, len(verilog_blocks), blocks_per_file):
-    chunk = verilog_blocks[i:i + blocks_per_file]
-    file_name = os.path.join(output_folder, f"verilog_blocks_part_{file_count}.json")
-    with open(file_name, "w") as json_file:
-        json.dump(chunk, json_file, indent=4)
-    print(f"Saved {len(chunk)} blocks to '{file_name}'.")
-    file_count += 1
+# blocks_per_file = 500
+# file_count = 1
+# for i in range(0, len(verilog_blocks), blocks_per_file):
+#     chunk = verilog_blocks[i:i + blocks_per_file]
+#     file_name = os.path.join(output_folder, f"verilog_blocks_part_{file_count}.json")
+#     with open(file_name, "w") as json_file:
+#         json.dump(chunk, json_file, indent=4)
+#     print(f"Saved {len(chunk)} blocks to '{file_name}'.")
+#     file_count += 1
+
+single_file_name = os.path.join(output_folder, "verilog_blocks_all.json")
+with open(single_file_name, "w") as json_file:
+    json.dump(verilog_blocks, json_file, indent=4)
 
 print(f"All Verilog blocks have been saved to the '{output_folder}' folder.")
 
