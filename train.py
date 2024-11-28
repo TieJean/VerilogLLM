@@ -5,11 +5,18 @@ from utils.dataloader import *
 from peft import LoraConfig, get_peft_model, TaskType
 
 if __name__ == "__main__":
-    # TODO move this to argparse
-    MAX_LENGTH = 1024
     
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model-type", type=str, default="codegen")
+    parser.add_argument("--model-size", type=str, default="350M")
+    parser.add_argument("--batch-size", type=int, default=2)
+    parser.add_argument("--max-length", type=int, default=1024)
+    args = parser.parse_args()
+    
+    MAX_LENGTH = args.max_length
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model, tokenizer = load_codegen(device)
+    model, tokenizer = load_codegen(device, size=args.model_size)
     # TODO need to tune me
     lora_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,  # Task type
@@ -28,7 +35,7 @@ if __name__ == "__main__":
     training_args = TrainingArguments(
         output_dir="./results",
         num_train_epochs=5,
-        per_device_train_batch_size=2,
+        per_device_train_batch_size=args.batch_size,
         save_steps=10,
         save_total_limit=2,
         logging_dir="./logs",

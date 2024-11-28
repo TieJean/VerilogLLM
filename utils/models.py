@@ -3,11 +3,11 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from transformers import Trainer, TrainingArguments
 
-def load_codegen(device: str, type="multi"):
+def load_codegen(device: str, type="multi", size="350M"):
     if type == "mono":
-        checkpoint = "Salesforce/codegen-350M-mono"
+        checkpoint = f"Salesforce/codegen-{size}-mono"
     elif type == "multi":
-        checkpoint = "Salesforce/codegen-350M-multi"
+        checkpoint = f"Salesforce/codegen-{size}-multi"
     else:
         raise ValueError(f"Invalid codegen type {type}")
     model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
