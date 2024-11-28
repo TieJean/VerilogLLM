@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # import pdb; pdb.set_trace()
     # model.print_trainable_parameters()
     
-    dataset = VeriGenDataset("data/train.csv", tokenizer, max_length=MAX_LENGTH)
+    dataset = VeriGenDataset("data/verilog_blocks_all.json", tokenizer, max_length=MAX_LENGTH)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=2)
     
     training_args = TrainingArguments(

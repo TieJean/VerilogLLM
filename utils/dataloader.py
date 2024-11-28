@@ -2,18 +2,21 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer
 import os
+import json
 
 def codegen_template(desc: str, code: str = ""):
     input_text = f"Task: Write Verilog program for the given description.\nDescription: {desc}.\nGenerated Code:\n"
     target_text = code
     return input_text + target_text
 
+def code_template(code: str):
+    text = f"Verilog Code: {code}"
+    return text
+
 class VeriGenDataset(Dataset):
     def __init__(self, datapath: str, tokenizer: AutoTokenizer, max_length: int):
         if not os.path.exists(datapath):
             raise FileNotFoundError(f"The file '{datapath}' does not exist.")
-        # TODO load post-processed data
-        # dummy data
         self.data = [
             {"prompt": "Add two numbers in Verilog.", "response": "module add(input [3:0] a, b, output [3:0] sum);\nassign sum = a + b;\nendmodule"},
             {"prompt": "4-bit counter in Verilog.", "response": "module counter(output reg [3:0] count, input clk);\nalways @(posedge clk) count <= count + 1;\nendmodule"},
@@ -36,6 +39,9 @@ class VeriGenDataset(Dataset):
             {"prompt": "7-segment display decoder for BCD in Verilog.", "response": "module seven_seg(input [3:0] bcd, output reg [6:0] seg);\nalways @* case(bcd)\n4'b0000: seg = 7'b1000000; // 0\n4'b0001: seg = 7'b1111001; // 1\n// Other cases here\nendcase\nendmodule"},
             {"prompt": "Synchronous 2-bit counter in Verilog.", "response": "module sync_counter(output reg [1:0] count, input clk, reset);\nalways @(posedge clk or posedge reset) if (reset) count <= 0; else count <= count + 1;\nendmodule"}
         ]
+        file = open(datapath, "r")
+        data = json.load(file)
+        self.data.append(data)
         self.tokenizer = tokenizer
         self.max_length = max_length
 
@@ -44,8 +50,10 @@ class VeriGenDataset(Dataset):
 
     def __getitem__(self, idx):
         item = self.data[idx]
-        # TODO need to have a text template function
-        text = codegen_template(desc=item['prompt'], code=item['response'])
+        if "prompt" in item.keys():
+            text = codegen_template(desc=item['prompt'], code=item['response'])
+        else:
+            text = code_template(item["code"])
 
         # Tokenize the inputs and targets
         embeddings = self.tokenizer(
