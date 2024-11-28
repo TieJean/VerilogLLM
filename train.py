@@ -27,12 +27,12 @@ if __name__ == "__main__":
     
     training_args = TrainingArguments(
         output_dir="./results",
-        num_train_epochs=15,
+        num_train_epochs=5,
         per_device_train_batch_size=2,
         save_steps=10,
         save_total_limit=2,
         logging_dir="./logs",
-        logging_steps=25,
+        logging_steps=100,
         report_to="none",
     )
 

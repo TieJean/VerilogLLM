@@ -41,7 +41,7 @@ class VeriGenDataset(Dataset):
         ]
         file = open(datapath, "r")
         data = json.load(file)
-        self.data.append(data)
+        self.data += data
         self.tokenizer = tokenizer
         self.max_length = max_length
 
