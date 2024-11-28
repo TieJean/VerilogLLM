@@ -5,10 +5,13 @@ from utils.dataloader import *
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model, tokenizer = load_codegen(device, type="mono")
-
+    model_path = "./results/lora_llama"  # Ensure this is the directory where the trained model was saved
+    model = AutoModelForCausalLM.from_pretrained(model_path).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
+    model.eval()
+    
     while True:
-        prompt = input("Give me a task (Enter 'q' to exit): ")
+        prompt = input("Give me a verilog task (Enter 'q' to exit): ")
         if prompt == "q":
             exit(0)
         # prompt = "Write a Python hello world program."
