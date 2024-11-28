@@ -23,7 +23,7 @@ if __name__ == "__main__":
     # model.print_trainable_parameters()
     
     dataset = VeriGenDataset("data/verilog_blocks_all.json", tokenizer, max_length=MAX_LENGTH)
-    train_loader = torch.utils.data.DataLoader(dataset, batch_size=2)
+    train_loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=True)
     
     training_args = TrainingArguments(
         output_dir="./results",
