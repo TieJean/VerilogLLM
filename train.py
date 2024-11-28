@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     # Fine-tune the model on GPU
     trainer.train()
-    model.save_pretrained("./results/verilogLLM")
+    model.save_pretrained(f"./results/verilogLLM-{args.model_type}-{args.model_size}")
 
     text = codegen_template(desc="Add two numbers in Verilog")
     inputs = tokenizer(text, return_tensors="pt").to(device)
