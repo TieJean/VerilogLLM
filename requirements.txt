@@ -6,3 +6,5 @@ pandas
 fsspec<=2024.9.0
 datasets
 peft
+pyarrow
+safetensors

@@ -2,7 +2,7 @@ import torch
 from transformers import Trainer, TrainingArguments, TrainerCallback
 from utils.models import *
 from utils.dataloader import *
-from peft import LoraConfig, get_peft_model, TaskType
+from peft import LoraConfig, get_peft_model, TaskType, PeftModel
 
 if __name__ == "__main__":
     
@@ -12,24 +12,44 @@ if __name__ == "__main__":
     parser.add_argument("--model-size", type=str, default="350M")
     parser.add_argument("--batch-size", type=int, default=2)
     parser.add_argument("--max-length", type=int, default=1024)
+    parser.add_argument("--checkpoint", type=str, default=None)
     args = parser.parse_args()
     
     MAX_LENGTH = args.max_length
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model, tokenizer = load_codegen(device, size=args.model_size)
+    base_model, tokenizer = load_codegen(device, size=args.model_size)
+         
     # TODO need to tune me
-    lora_config = LoraConfig(
-        task_type=TaskType.CAUSAL_LM,  # Task type
-        inference_mode=False,          # Indicates training, not inference
-        r=8,                           # Low-rank matrix dimension
-        lora_alpha=32,                 # Scaling factor; W' = W = alpha/r * (AB)
-        lora_dropout=0.05,              # Dropout for LoRA layers
-    )
-    model = get_peft_model(model, lora_config)
-    # import pdb; pdb.set_trace()
+    if args.checkpoint is None:
+        lora_config = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,  # Task type
+            inference_mode=False,          # Indicates training, not inference
+            r=8,                           # Low-rank matrix dimension
+            lora_alpha=32,                 # Scaling factor; W' = W = alpha/r * (AB)
+            lora_dropout=0.05,              # Dropout for LoRA layers
+        )
+        model = get_peft_model(base_model, lora_config)
+        model.print_trainable_parameters()
+    else:
+        print(f"Loading checkpoint from {args.checkpoint}...")
+        model = PeftModel.from_pretrained(base_model, "./results/verilogLLM-codegen-350M/")
+        for name, param in model.named_parameters():
+            if 'lora' in name:
+                param.requires_grad = True
+        model.print_trainable_parameters()
     # model.print_trainable_parameters()
     
-    dataset = VeriGenDataset("data/verilog_blocks_all.json", tokenizer, max_length=MAX_LENGTH)
+    # datapaths = ["data/verilog_blocks_all.json"]
+    datapaths = [
+        "data/packaged_dataset/detailed_description_dataset/",
+        "data/packaged_dataset/simple_description_dataset/",
+        "data/packaged_dataset/merged_dataset/",
+        "data/packaged_dataset/llm2_block_summary_to_pure_code_one_shot_dataset/",
+        "data/packaged_dataset/vanilla_baseline/"
+        
+    ]
+    dataset = VeriGenDataset(datapaths, tokenizer, max_length=MAX_LENGTH)
+    
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=True)
     
     training_args = TrainingArguments(
@@ -53,7 +73,11 @@ if __name__ == "__main__":
 
     # Fine-tune the model on GPU
     trainer.train()
-    model.save_pretrained(f"./results/verilogLLM-{args.model_type}-{args.model_size}")
+    savepath = f"./results/verilogLLM-{args.model_type}-{args.model_size}"
+    if args.checkpoint is not None:
+        from datetime import datetime
+        savepath += f"-{datetime.today().strftime('%Y%m%d')}"
+    model.save_pretrained(savepath)
 
     text = codegen_template(desc="Add two numbers in Verilog")
     inputs = tokenizer(text, return_tensors="pt").to(device)

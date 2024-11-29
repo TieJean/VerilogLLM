@@ -1,8 +1,7 @@
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 import os
-import json
 
 def codegen_template(desc: str, code: str = ""):
     input_text = f"Task: Write Verilog program for the given description.\nDescription: {desc}.\nGenerated Code:\n"
@@ -14,9 +13,7 @@ def code_template(code: str):
     return text
 
 class VeriGenDataset(Dataset):
-    def __init__(self, datapath: str, tokenizer: AutoTokenizer, max_length: int):
-        if not os.path.exists(datapath):
-            raise FileNotFoundError(f"The file '{datapath}' does not exist.")
+    def __init__(self, datapaths: list, tokenizer: AutoTokenizer, max_length: int):
         self.data = [
             {"prompt": "Add two numbers in Verilog.", "response": "module add(input [3:0] a, b, output [3:0] sum);\nassign sum = a + b;\nendmodule"},
             {"prompt": "4-bit counter in Verilog.", "response": "module counter(output reg [3:0] count, input clk);\nalways @(posedge clk) count <= count + 1;\nendmodule"},
@@ -39,9 +36,18 @@ class VeriGenDataset(Dataset):
             {"prompt": "7-segment display decoder for BCD in Verilog.", "response": "module seven_seg(input [3:0] bcd, output reg [6:0] seg);\nalways @* case(bcd)\n4'b0000: seg = 7'b1000000; // 0\n4'b0001: seg = 7'b1111001; // 1\n// Other cases here\nendcase\nendmodule"},
             {"prompt": "Synchronous 2-bit counter in Verilog.", "response": "module sync_counter(output reg [1:0] count, input clk, reset);\nalways @(posedge clk or posedge reset) if (reset) count <= 0; else count <= count + 1;\nendmodule"}
         ]
-        file = open(datapath, "r")
-        data = json.load(file)
-        self.data += data
+        for datapath in datapaths:
+            if not os.path.exists(datapath):
+                raise FileNotFoundError(f"The file '{datapath}' does not exist.")
+            if '.json' in datapath:
+                import json
+                file = open(datapath, "r")
+                data = json.load(file)
+            elif 'packaged_dataset' in datapath:
+                import datasets
+                data = datasets.Dataset.load_from_disk(datapath)
+                data = [{"prompt": row["description"], "response": row["code"]} for row in data]
+            self.data += data
         self.tokenizer = tokenizer
         self.max_length = max_length
 
