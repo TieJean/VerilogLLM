@@ -3,6 +3,26 @@ from transformers import Trainer, TrainingArguments, TrainerCallback
 from utils.models import *
 from utils.dataloader import *
 from peft import LoraConfig, get_peft_model, TaskType, PeftModel
+from datetime import datetime
+
+class LossLoggingCallback(TrainerCallback):
+    def __init__(self, outpath):
+        self.outpath = outpath
+        self.loss_log = []
+
+    def on_step_end(self, args, state, control, **kwargs):
+        # Log loss at each step
+        if state.log_history and "loss" in state.log_history[-1]:
+            loss = state.log_history[-1]["loss"]
+            step = state.global_step
+            self.loss_log.append({"step": step, "loss": loss})
+    
+    def on_train_end(self, args, state, control, **kwargs):
+        # Save the loss log to a file at the end of training
+        with open(self.outpath, "w") as f:
+            import json
+            json.dump(self.loss_log, f)
+        print(f"Training loss log saved to {self.outpath}")
 
 if __name__ == "__main__":
     
@@ -52,6 +72,7 @@ if __name__ == "__main__":
     
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=True)
     
+    savename = f"verilogLLM-{args.model_type}-{args.model_size}-{datetime.today().strftime('%Y%m%d')}"
     training_args = TrainingArguments(
         output_dir="./results",
         num_train_epochs=5,
@@ -59,7 +80,7 @@ if __name__ == "__main__":
         save_steps=10,
         save_total_limit=2,
         logging_dir="./logs",
-        logging_steps=100,
+        logging_steps=10,
         report_to="none",
     )
 
@@ -68,6 +89,7 @@ if __name__ == "__main__":
         model=model,
         args=training_args,
         train_dataset=dataset,
+        callbacks=[LossLoggingCallback(os.path.join("./logs", f"{savename}.json"))],
     )
     trainer.train_loader = train_loader
 
@@ -75,7 +97,6 @@ if __name__ == "__main__":
     trainer.train()
     savepath = f"./results/verilogLLM-{args.model_type}-{args.model_size}"
     if args.checkpoint is not None:
-        from datetime import datetime
         savepath += f"-{datetime.today().strftime('%Y%m%d')}"
     model.save_pretrained(savepath)
 
