@@ -5,7 +5,7 @@ from peft import PeftModel
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     base_model, tokenizer = load_codegen(device)
-    model = PeftModel.from_pretrained(base_model, "./results/verilogLLM/")
+    model = PeftModel.from_pretrained(base_model, "./results/verilogLLM-codegen-350M/")
     while True:
         prompt = input("Give me a task (Enter 'q' to exit): ")
         if prompt == "q":
@@ -15,6 +15,7 @@ if __name__ == "__main__":
         # Generate code
         output = model.generate(
             inputs["input_ids"],
+            attention_mask=inputs["attention_mask"],
             max_length=1024,        # Maximum length of the output
             num_beams=5,           # Beam search for better quality
             temperature=0.7,       # Sampling temperature for diversity
@@ -26,5 +27,4 @@ if __name__ == "__main__":
 
         # Decode and print the generated code
         generated_code = tokenizer.decode(output[0], skip_special_tokens=True)
-        import pdb; pdb.set_trace()
         print(generated_code)
