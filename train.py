@@ -71,12 +71,12 @@ if __name__ == "__main__":
     
     # datapaths = ["data/verilog_blocks_all.json"]
     datapaths = [
-        "data/verilog_blocks_all.json",
+        # "data/verilog_blocks_all.json",
         "data/packaged_dataset/detailed_description_dataset/",
-        "data/packaged_dataset/simple_description_dataset/",
-        "data/packaged_dataset/merged_dataset/",
-        "data/packaged_dataset/llm2_block_summary_to_pure_code_one_shot_dataset/",
-        "data/packaged_dataset/vanilla_baseline/"
+        # "data/packaged_dataset/simple_description_dataset/",
+        # "data/packaged_dataset/merged_dataset/",
+        # "data/packaged_dataset/llm2_block_summary_to_pure_code_one_shot_dataset/",
+        # "data/packaged_dataset/vanilla_baseline/"
     ]
     dataset = VeriGenDataset(datapaths, tokenizer, max_length=MAX_LENGTH)
     train_size = int(0.8 * len(dataset))
@@ -120,7 +120,7 @@ if __name__ == "__main__":
         savepath += f"-{datetime.today().strftime('%Y%m%d')}"
     model.save_pretrained(savepath)
 
-    text = codegen_template(desc="Add two numbers in Verilog")
+    text = instruct_template(desc="Add two numbers in Verilog")
     inputs = tokenizer(text, return_tensors="pt").to(device)
     output = model.generate(
         inputs["input_ids"],

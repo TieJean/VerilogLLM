@@ -1,5 +1,5 @@
 from utils.models import *
-from utils.dataloader import codegen_template
+from utils.dataloader import codegen_template, instruct_template
 from peft import PeftModel
 
 if __name__ == "__main__":
@@ -15,7 +15,7 @@ if __name__ == "__main__":
         prompt = input("Give me a task (Enter 'q' to exit): ")
         if prompt == "q":
             exit(0)
-        prompt = codegen_template(prompt)
+        prompt = instruct_template(prompt)
         inputs = tokenizer(prompt, return_tensors="pt").to(device)
         # Generate code
         output = model.generate(
