@@ -79,7 +79,7 @@ if __name__ == "__main__":
         # "data/packaged_dataset/vanilla_baseline/"
     ]
     dataset = VeriGenDataset(datapaths, tokenizer, max_length=MAX_LENGTH)
-    train_size = int(0.8 * len(dataset))
+    train_size = int(0.99 * len(dataset))
     test_size = len(dataset) - train_size
     train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
     
@@ -96,7 +96,7 @@ if __name__ == "__main__":
         save_steps=10,
         save_total_limit=2,
         eval_strategy="steps",
-        eval_steps=10,  
+        eval_steps=1000,  
         logging_dir="./logs",
         logging_steps=10,
         report_to="none",
