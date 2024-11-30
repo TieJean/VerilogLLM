@@ -61,16 +61,16 @@ if __name__ == "__main__":
     
     # datapaths = ["data/verilog_blocks_all.json"]
     datapaths = [
+         "data/verilog_blocks_all.json",
         "data/packaged_dataset/detailed_description_dataset/",
         "data/packaged_dataset/simple_description_dataset/",
         "data/packaged_dataset/merged_dataset/",
         "data/packaged_dataset/llm2_block_summary_to_pure_code_one_shot_dataset/",
         "data/packaged_dataset/vanilla_baseline/"
-        
     ]
     dataset = VeriGenDataset(datapaths, tokenizer, max_length=MAX_LENGTH)
     
-    train_loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
     
     savename = f"verilogLLM-{args.model_type}-{args.model_size}-{datetime.today().strftime('%Y%m%d')}"
     training_args = TrainingArguments(
