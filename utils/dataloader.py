@@ -39,6 +39,7 @@ class VeriGenDataset(Dataset):
         #     {"prompt": "[INST] <<SYS>>\n    You only complete chats with syntax correct Verilog code. End the Verilog module code completion with \'endmodule\'. Do not include module, input and output definitions.\n    <</SYS>>\n\n7-segment display decoder for BCD in Verilog.\n [/INST]", "response": "module seven_seg(input [3:0] bcd, output reg [6:0] seg);\nalways @* case(bcd)\n4'b0000: seg = 7'b1000000; // 0\n4'b0001: seg = 7'b1111001; // 1\n// Other cases here\nendcase\nendmodule"},
         #     {"prompt": "[INST] <<SYS>>\n    You only complete chats with syntax correct Verilog code. End the Verilog module code completion with \'endmodule\'. Do not include module, input and output definitions.\n    <</SYS>>\n\nSynchronous 2-bit counter in Verilog.\n [/INST]", "response": "module sync_counter(output reg [1:0] count, input clk, reset);\nalways @(posedge clk or posedge reset) if (reset) count <= 0; else count <= count + 1;\nendmodule"}
         # ]
+        self.data = []
         for datapath in datapaths:
             if not os.path.exists(datapath):
                 raise FileNotFoundError(f"The file '{datapath}' does not exist.")
