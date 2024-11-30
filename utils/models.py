@@ -2,8 +2,13 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
-def load_llamaInstruct(device: str):
-    checkpoint = "meta-llama/Llama-3.2-1B-Instruct"
+def load_llamaInstruct(device: str, type: str = "normal"):
+    if type == "normal":
+        checkpoint = "meta-llama/Llama-3.2-1B"
+    elif type == "instruct":
+        checkpoint = "meta-llama/Llama-3.2-1B-Instruct"
+    else:
+        raise ValueError(f"Unsupported llama model type {type}")
     tokenizer = AutoTokenizer.from_pretrained(checkpoint)
     model = AutoModelForCausalLM.from_pretrained(checkpoint)
     tokenizer.pad_token = tokenizer.eos_token
