@@ -87,6 +87,8 @@ if __name__ == "__main__":
     
     savename = f"verilogLLM-{args.model_type}-{args.model_size}-{datetime.today().strftime('%Y%m%d')}"
     per_device_train_batch_size = args.batch_size // torch.cuda.device_count()
+    if args.batch_size % torch.cuda.device_count() != 0:
+        raise ValueError("Batch size must be divisible by the number of GPUs.")
     training_args = TrainingArguments(
         output_dir="./results",
         num_train_epochs=5,
@@ -109,7 +111,7 @@ if __name__ == "__main__":
         eval_dataset=test_dataset,
         callbacks=[LossLoggingCallback(os.path.join("./logs", f"{savename}.json"))],
     )
-    trainer.train_loader = train_loader
+    # trainer.train_loader = train_loader
 
     # Fine-tune the model on GPU
     trainer.train()
