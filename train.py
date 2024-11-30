@@ -79,10 +79,11 @@ if __name__ == "__main__":
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
     
     savename = f"verilogLLM-{args.model_type}-{args.model_size}-{datetime.today().strftime('%Y%m%d')}"
+    per_device_train_batch_size = args.batch_size // torch.cuda.device_count()
     training_args = TrainingArguments(
         output_dir="./results",
         num_train_epochs=5,
-        per_device_train_batch_size=args.batch_size,
+        per_device_train_batch_size=per_device_train_batch_size,
         save_steps=10,
         save_total_limit=2,
         logging_dir="./logs",
