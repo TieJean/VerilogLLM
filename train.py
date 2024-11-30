@@ -4,18 +4,22 @@ from utils.models import *
 from utils.dataloader import *
 from peft import LoraConfig, get_peft_model, TaskType, PeftModel
 from datetime import datetime
+from torch.utils.data import random_split
 
 class LossLoggingCallback(TrainerCallback):
     def __init__(self, outpath):
         self.outpath = outpath
         self.loss_log = []
 
-    def on_step_end(self, args, state, control, **kwargs):
+    def on_log(self, args, state, control, logs=None, **kwargs):
         # Log loss at each step
-        if state.log_history and "loss" in state.log_history[-1]:
-            loss = state.log_history[-1]["loss"]
-            step = state.global_step
-            self.loss_log.append({"step": step, "loss": loss})
+        if logs is None:
+            return
+        step = state.global_step
+        if "loss" in logs:  # Training loss
+            self.loss_log.append({"step": step, "type": "train", "loss": logs["loss"]})
+        if "eval_loss" in logs:  # Evaluation loss
+            self.loss_log.append({"step": step, "type": "eval", "loss": logs["eval_loss"]})
     
     def on_train_end(self, args, state, control, **kwargs):
         # Save the loss log to a file at the end of training
@@ -67,7 +71,7 @@ if __name__ == "__main__":
     
     # datapaths = ["data/verilog_blocks_all.json"]
     datapaths = [
-         "data/verilog_blocks_all.json",
+        "data/verilog_blocks_all.json",
         "data/packaged_dataset/detailed_description_dataset/",
         "data/packaged_dataset/simple_description_dataset/",
         "data/packaged_dataset/merged_dataset/",
@@ -75,6 +79,9 @@ if __name__ == "__main__":
         "data/packaged_dataset/vanilla_baseline/"
     ]
     dataset = VeriGenDataset(datapaths, tokenizer, max_length=MAX_LENGTH)
+    train_size = int(0.8 * len(dataset))
+    test_size = len(dataset) - train_size
+    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
     
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, drop_last=True)
     
@@ -86,16 +93,20 @@ if __name__ == "__main__":
         per_device_train_batch_size=per_device_train_batch_size,
         save_steps=10,
         save_total_limit=2,
+        eval_strategy="steps",
+        eval_steps=10,  
         logging_dir="./logs",
         logging_steps=10,
         report_to="none",
+        ddp_find_unused_parameters=False
     )
 
     # Initialize Trainer
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=dataset,
+        train_dataset=train_dataset,
+        eval_dataset=test_dataset,
         callbacks=[LossLoggingCallback(os.path.join("./logs", f"{savename}.json"))],
     )
     trainer.train_loader = train_loader
