@@ -76,7 +76,7 @@ if __name__ == "__main__":
     ]
     dataset = VeriGenDataset(datapaths, tokenizer, max_length=MAX_LENGTH)
     
-    train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True, drop_last=True)
     
     savename = f"verilogLLM-{args.model_type}-{args.model_size}-{datetime.today().strftime('%Y%m%d')}"
     per_device_train_batch_size = args.batch_size // torch.cuda.device_count()
