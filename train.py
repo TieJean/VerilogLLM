@@ -37,7 +37,13 @@ if __name__ == "__main__":
     
     MAX_LENGTH = args.max_length
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    base_model, tokenizer = load_codegen(device, size=args.model_size)
+    if args.model_type == "codegen":
+        base_model, tokenizer = load_codegen(device, size=args.model_size)
+    elif args.model_type == "llama":
+        base_model, tokenizer = load_llamaInstruct(device)
+    else:
+        print(f"Invalid model type {args.model_type}")
+        exit(1)
          
     # TODO need to tune me
     if args.checkpoint is None:

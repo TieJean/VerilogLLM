@@ -1,7 +1,14 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
-from transformers import Trainer, TrainingArguments
+
+def load_llamaInstruct(device: str):
+    checkpoint = "meta-llama/Llama-3.2-1B-Instruct"
+    tokenizer = AutoTokenizer.from_pretrained(checkpoint)
+    model = AutoModelForCausalLM.from_pretrained(checkpoint)
+    tokenizer.pad_token = tokenizer.eos_token
+    model.generation_config.pad_token_id = tokenizer.pad_token_id
+    return model.to(device), tokenizer
 
 def load_codegen(device: str, type="multi", size="350M"):
     if type == "mono":

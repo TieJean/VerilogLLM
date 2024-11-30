@@ -4,7 +4,7 @@ from transformers import AutoTokenizer
 import os
 
 def codegen_template(desc: str, code: str = ""):
-    input_text = f"Task: Write Verilog program for the given description.\nDescription: {desc}.\nGenerated Code:\n"
+    input_text = f"[INST] Task: Write Verilog program for the given description.[/INST]\nDescription: {desc}.\nGenerated Code:\n"
     target_text = code
     return input_text + target_text
 
