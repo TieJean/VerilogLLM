@@ -13,7 +13,7 @@ def code_template(code: str):
     return text
 
 def instruct_template(desc: str, code: str = ""):
-    input_text = f"<s>[INST] <<SYS>>\n    You only complete chats with syntax correct Verilog code. End the Verilog module code completion with \'endmodule\'. Do not include module, input and output definitions.\n    <</SYS>>\n\n {desc} \n\n {code}"
+    input_text = f"Task: <s>[INST] <<SYS>>\n    You only complete chats with syntax correct Verilog code. End the Verilog module code completion with \'endmodule\'. Do not include module, input and output definitions.\n    <</SYS>>\n\n Implement the Verilog module based on the following description.\n {desc} \n\n Response:\n {code}"
     return input_text
 
 class VeriGenDataset(Dataset):
@@ -61,7 +61,7 @@ class VeriGenDataset(Dataset):
     def __getitem__(self, idx):
         item = self.data[idx]
         if "prompt" in item.keys():
-            text = codegen_template(desc=item['prompt'], code=item['response'])
+            text = f"Task: {item['prompt']} Response:\n {item['response']}"
         else:
             text = code_template(item["code"])
 
