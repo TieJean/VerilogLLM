@@ -44,7 +44,7 @@ if __name__ == "__main__":
     if args.model_type == "codegen":
         base_model, tokenizer = load_codegen(device, size=args.model_size)
     elif args.model_type == "llama":
-        base_model, tokenizer = load_llamaInstruct(device)
+        base_model, tokenizer = load_llama(device)
     else:
         print(f"Invalid model type {args.model_type}")
         exit(1)

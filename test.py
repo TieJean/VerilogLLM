@@ -5,11 +5,11 @@ from peft import PeftModel
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--checkpoint", type=str, default="./results/verilogLLM-codegen-350M/")
+    parser.add_argument("--checkpoint", type=str, default="./results/verilogLLM-llama-1B/")
     args = parser.parse_args()
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    base_model, tokenizer = load_codegen(device)
+    base_model, tokenizer = load_llama(device)
     model = PeftModel.from_pretrained(base_model, args.checkpoint)
     while True:
         prompt = input("Give me a task (Enter 'q' to exit): ")

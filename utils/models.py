@@ -2,7 +2,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
-def load_llamaInstruct(device: str, type: str = "normal"):
+def load_llama(device: str, type: str = "normal"):
     if type == "normal":
         checkpoint = "meta-llama/Llama-3.2-1B"
     elif type == "instruct":
