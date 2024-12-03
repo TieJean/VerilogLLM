@@ -9,13 +9,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    base_model, tokenizer = load_llama(device)
+    if "llama" in args.checkpoint:
+        base_model, tokenizer = load_llama(device)
+    elif "codegen" in args.checkpoint:
+        base_model, tokenizer = load_codegen(device)
+    else:
+        raise ValueError("Unsupported base model type")
     model = PeftModel.from_pretrained(base_model, args.checkpoint)
     while True:
         prompt = input("Give me a task (Enter 'q' to exit): ")
         if prompt == "q":
             exit(0)
-        prompt = instruct_template(prompt)
+        if "llama" in args.checkpoint:
+            prompt = instruct_template(prompt)
+        elif "codegen" in args.checkpoint:
+            prompt = codegen_template(prompt)
         inputs = tokenizer(prompt, return_tensors="pt").to(device)
         # Generate code
         output = model.generate(
@@ -32,4 +40,21 @@ if __name__ == "__main__":
 
         # Decode and print the generated code
         generated_code = tokenizer.decode(output[0], skip_special_tokens=True)
-        print(generated_code)
+        if "llama" in args.checkpoint:
+            lines = [line.strip() for line in generated_code.split("\n")]
+            code = None
+            for line in lines:
+                line += "\n"
+                if "module " in line and "(" in line:
+                    code = []
+                    code.append(line)
+                elif (code is not None) and ("endmodule" in line):
+                    code.append(line)
+                    break
+                elif code is not None:
+                    if ("response" not in line.lower()) and ("[/INST]" not in line):
+                        code.append(line)
+            code = ''.join(code)
+            print(code)
+        else:
+            print(generated_code)
