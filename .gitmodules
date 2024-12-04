@@ -3,6 +3,3 @@
     url = https://github.com/Vufoo/verilog-eval.git
 
 
-[submodule "iverilog"]
-    path = iverilog
-    url = https://github.com/Vufoo/iverilog.git
