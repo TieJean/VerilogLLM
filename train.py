@@ -64,23 +64,6 @@ if __name__ == "__main__":
 
     mg_dataset = MGDataset("packaged_dataset/simple_description_dataset", llama_tokenizer, max_length=512)
 
-    # Seeing items in dataset
-    # print(mg_dataset.data[0].keys())
-    # for i in range(5):
-    #     item = mg_dataset.data[i]  # Access the raw dataset entry
-    #     description = item['description']
-    #     code = item['code']
-    #     print("Description: ", description)
-    #     print("Code: ", code)
-
-    #     # data = mg_dataset[i]
-    #     # print("Input IDs:", data['input_ids'])
-    #     # print("Attention Mask:", data['attention_mask'])
-    #     # print("Labels:", data['labels'])
-    #     print("-" * 100)
-
-
-
     train_loader = torch.utils.data.DataLoader(mg_dataset, batch_size=2)
     training_args = TrainingArguments(
         output_dir="./results",
@@ -104,16 +87,3 @@ if __name__ == "__main__":
     llama_model.save_pretrained("./results/lora_llama")
 
 
-    # # Test model with sample description
-    # text = codegen_template(desc="Add two numbers in Verilog.")
-    # inputs = codegen_tokenizer(text, return_tensors="pt").to(device)
-    # output = codegen_model.generate(
-    #     inputs["input_ids"],
-    #     max_length=512,        # Maximum length of the output
-    #     num_beams=5,           # Beam search for better quality
-    #     temperature=0.7,       # Sampling temperature for diversity
-    #     top_k=50,              # Limit sampling to top k tokens
-    #     top_p=0.95,            # Nucleus sampling for diversity
-    #     repetition_penalty=1.2 # Penalize repetitive text
-    # )
-    # print(codegen_tokenizer.decode(output[0], skip_special_tokens=True))

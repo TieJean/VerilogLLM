@@ -9,6 +9,10 @@ def codegen_template(desc: str, code: str = ""):
     target_text = code
     return input_text + target_text
 
+def instruct_template(desc: str, header: str = "", code: str = ""):
+    input_text = f"Task: <s>[INST] <<SYS>>\n  You only complete chats with syntax correct Verilog code. End the Verilog module code completion with \'endmodule\'. Do not include module, input and output definitions.\n    <</SYS>>\n\n Implement the Verilog module based on the following description.\n {desc} \n\n Response:\n {header} {code}"
+    return input_text
+
 class MGDataset(Dataset):
     def __init__(self, datapath: str, tokenizer: AutoTokenizer, max_length: int):
         if not os.path.exists(datapath):
