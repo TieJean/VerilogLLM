@@ -33,7 +33,7 @@ if __name__ == "__main__":
             io_ports = task_data_from_f2['prompt']
             description = data["detail_description"]
 
-            prompt = instruct_template(desc=description, header=io_ports)
+            prompt = llama_template(desc=description, header=io_ports)
 
             if(len(prompt)>2048):
                 continue
@@ -50,7 +50,7 @@ if __name__ == "__main__":
                 top_k=60,              # Limit sampling to top k tokens
                 do_sample=True,
                 top_p=0.95,            # Nucleus sampling for diversity
-                repetition_penalty=2.0, # Penalize repetitive text
+                repetition_penalty=1.9, # Penalize repetitive text
             )
 
             # Decode and print the generated code

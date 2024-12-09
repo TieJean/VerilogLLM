@@ -15,7 +15,7 @@ if __name__ == "__main__":
         prompt = input("Give me a task (Enter 'q' to exit): ")
         if prompt == "q":
             exit(0)
-        prompt = instruct_template(prompt)
+        prompt = llama_template(prompt)
         inputs = tokenizer(prompt, return_tensors="pt").to(device)
         # Generate code
         output = model.generate(
@@ -24,10 +24,10 @@ if __name__ == "__main__":
             max_length=1024,        # Maximum length of the output
             num_beams=5,           # Beam search for better quality
             temperature=0.7,       # Sampling temperature for diversity
-            top_k=50,              # Limit sampling to top k tokens
+            top_k=60,              # Limit sampling to top k tokens
             do_sample=True,
             top_p=0.95,            # Nucleus sampling for diversity
-            repetition_penalty=1.2, # Penalize repetitive text
+            repetition_penalty=1.9, # Penalize repetitive text
         )
 
         # Decode and print the generated code

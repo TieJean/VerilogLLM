@@ -6,12 +6,17 @@ import json
 import argparse
 
 if __name__ == "__main__":
-    with open('./evaluation_data/llama_solution.jsonl', 'r') as f1, open('./evaluation_data/llama_solution_parsed.jsonl', 'w') as output_file:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=str, default="./evaluation_data/llama_solution.jsonl")
+    parser.add_argument("--parsed", type=str, default="./evaluation_data/llama_solution_parsed.jsonl")
+
+    args = parser.parse_args()
+    with open(args.output, 'r') as f1, open(args.parsed, 'w') as output_file:
         for line in f1:
             data = json.loads(line)
             task = data["task_id"]
             completion = data["completion"]
-
+            
             if "Response:" in completion:
                 parts = completion.split("Response:", 1)  
                 generated_code = parts[1].lstrip()  # Get the part after "Generated Code:" and strip whitespace
@@ -20,15 +25,6 @@ if __name__ == "__main__":
                     generated_code = "\n\t" + parts2[1].lstrip()
             else:
                 generated_code = ""
-
-            # unwanted_strings = [
-            #     "[/ASSIGN]", "[/INPUT]", "[/OUTPUT]", "[/PORT]",
-            #     "[/VERilog]", "[/VERILATOR TASK]", "[/TASK]",
-            #     "[/Karnaugh_map]", "Response:", "[/VERilogCode]", "[/MARK]", "[/Karnaugh_Map]", "[/B]",
-            #     "[/A]", "[/KARNAUGH MAP]", "[/ONEHOT]", "[/GENERIC MSG]"
-            # ]
-            # for unwanted in unwanted_strings:
-            #     generated_code = generated_code.replace(unwanted, "").strip()
 
             result = {
                 "task_id": task,
