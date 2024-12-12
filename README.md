@@ -25,5 +25,5 @@ nano llama_solution_parsed.json_results.jsonl
 ```
 
 # Few shot prompt generation
-This flow is available within the /fewshot_prompt_input_generation folder. It is run outside the main evaluation flow to generate the fewshot_VerilogDescription.jsonl files containing the modfied prompts.
+This flow is available within the "fewshot_prompt_input_generation" folder. It is run outside the main evaluation flow to generate the fewshot_VerilogDescription.jsonl files containing the modfied prompts.
 Please refer to the README in the folder for usage and further details.
